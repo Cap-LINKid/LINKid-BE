@@ -1,0 +1,33 @@
+name: Bug Template
+description: 버그 제보
+title: "[Fix] Bug Title"
+labels: ["fix"]
+
+body:
+  - type: textarea
+    id: bug-contents
+    attributes:
+      label: 💬 이슈 설명
+      description: 자세한 버그를 설명해 주세요.
+      placeholder: "ex. !!! 상황에서 ~~~한 버그가 난다."
+    validations:
+      required: true
+  - type: textarea
+    id: solve-steps
+    attributes:
+      label: 🔨 해결 방식
+      description: 어떻게 해결할지 체크박스 형태로 써주세요.
+      value: |
+        - [ ] 작업
+        - [ ] 
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: consider
+    attributes:
+      label: ⚠️ 주의할 점(Optional)
+      description: 주의해야할 점을 써주세요
+      placeholder: "ex. 검색시 여러 칼럼을 동시에 봐야한다"
+    validations:
+      required: false
