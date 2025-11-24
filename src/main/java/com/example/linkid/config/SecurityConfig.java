@@ -20,6 +20,10 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private static final String[] SWAGGER_URLS = {
+            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -27,6 +31,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(SWAGGER_URLS).permitAll()
                         // 인증 API는 모두 허용
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         // Presigned URL 등 테스트 API 허용 필요시 추가
