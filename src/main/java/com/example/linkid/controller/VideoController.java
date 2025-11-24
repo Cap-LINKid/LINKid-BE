@@ -1,8 +1,12 @@
 package com.example.linkid.controller;
 
+import com.example.linkid.domain.User;
+import com.example.linkid.repository.UserRepository;
 import com.example.linkid.service.VideoAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -13,12 +17,18 @@ import java.util.Map;
 public class VideoController {
 
     private final VideoAnalysisService videoAnalysisService;
+    private final UserRepository userRepository;
 
     // 1. 영상 업로드용 Presigned URL 요청
     @PostMapping("/presign")
     public ResponseEntity<?> getPresignedUrl(@RequestBody Map<String, String> request) {
-        // TODO: SecurityContextHolder에서 userId 추출 필요
-        Long userId = 1L;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        User user = userRepository.findByName(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("로그인된 사용자 정보를 찾을 수 없습니다."));
+
+        Long userId = user.getUserId();
 
         Map<String, Object> data = videoAnalysisService.generatePresignedUrl(
                 userId,

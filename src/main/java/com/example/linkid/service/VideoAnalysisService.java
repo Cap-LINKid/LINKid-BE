@@ -1,7 +1,10 @@
 package com.example.linkid.service;
 
 import com.example.linkid.domain.*;
+import com.example.linkid.dto.AiApiDto;
 import com.example.linkid.repository.AnalysisReportRepository;
+import com.example.linkid.repository.ChildRepository;
+import com.example.linkid.repository.UserRepository;
 import com.example.linkid.repository.VideoRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,8 @@ public class VideoAnalysisService {
 
     private final VideoRepository videoRepository;
     private final AnalysisReportRepository reportRepository;
+    private final ChildRepository childRepository;
+    private final UserRepository userRepository;
     private final ObjectStorageService objectStorageService;
     private final AiAnalysisService aiAnalysisService;
 
@@ -27,13 +32,20 @@ public class VideoAnalysisService {
 
     // 영상 업로드 Presigned URL 발급
     public Map<String, Object> generatePresignedUrl(Long userId, String fileName, String contentType, String contextTag) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        // 자녀가 1명 가정
+        Child child = childRepository.findFirstByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("등록된 자녀가 없습니다."));
+
         String bucketKey = "user-" + userId + "/" + System.currentTimeMillis() + "-" + fileName;
         String uploadUrl = objectStorageService.generatePresignedUploadUrl(bucketKey, contentType);
 
         // Video 메타데이터 임시 저장
         Video video = new Video();
         video.setUserId(userId);
-        video.setChildId(1L); // TODO: 실제 자녀 ID 조회 로직 필요
+        video.setChildId(child.getChildId());
         video.setFileName(fileName);
         video.setBucketKey(bucketKey);
         video.setContentType(contentType);
@@ -87,36 +99,41 @@ public class VideoAnalysisService {
         }
 
         // 2. AI 분석 중 상태 확인
-//        if (video.getStatus() == VideoStatus.AI_ANALYZING && video.getAiExecutionId() != null) {
-//            try {
-//                AiApiDto.StatusResponse aiStatus = aiAnalysisService.getStatus(video.getAiExecutionId());
-//
-//                if ("completed".equalsIgnoreCase(aiStatus.getStatus())) {
-//                    saveAnalysisResult(video, aiStatus.getResult());
-//
-//                    AnalysisReport report = reportRepository.findByVideo(video)
-//                                 .orElseThrow(() -> new IllegalStateException("리포트가 생성되지 않았습니다."));
-//
-//                    return Map.of(
-//                            "videoId", video.getVideoId(),
-//                            "status", "COMPLETED",
-//                            "message", "분석이 완료되었습니다",
-//                            "reportId", report.getReportId()
-//                    );
-//                } else if ("failed".equalsIgnoreCase(aiStatus.getStatus())) {
-//                    video.setStatus(VideoStatus.FAILED);
-//                } else {
-//                    return Map.of(
-//                            "videoId", video.getVideoId(),
-//                            "status", "AI_ANALYZING",
-//                            "progress", aiStatus.getProgress_percentage(),
-//                            "message", aiStatus.getStatus_message() != null ? aiStatus.getStatus_message() : "AI 분석 진행 중..."
-//                    );
-//                }
-//            } catch (Exception e) {
-//                log.error("AI 상태 조회 실패", e);
-//            }
-//        }
+        if (video.getStatus() == VideoStatus.AI_ANALYZING && video.getAiExecutionId() != null) {
+            try {
+                // AI 서버에 현재 상태 조회
+                AiApiDto.StatusResponse aiStatus = aiAnalysisService.getStatus(video.getAiExecutionId());
+
+                if ("completed".equalsIgnoreCase(aiStatus.getStatus())) {
+                    // 분석 완료 시 리포트 저장
+                    saveAnalysisResult(video, aiStatus.getResult());
+
+                    AnalysisReport report = reportRepository.findByVideo(video)
+                            .orElseThrow(() -> new IllegalStateException("리포트가 생성되지 않았습니다."));
+
+                    return Map.of(
+                            "videoId", video.getVideoId(),
+                            "status", "COMPLETED",
+                            "message", "분석이 완료되었습니다",
+                            "reportId", report.getReportId()
+                    );
+                } else if ("failed".equalsIgnoreCase(aiStatus.getStatus())) {
+                    video.setStatus(VideoStatus.FAILED);
+                    videoRepository.save(video); // 상태 저장 필요
+                } else {
+                    // [진행 중] 상세 상태 반환
+                    return Map.of(
+                            "videoId", video.getVideoId(),
+                            "status", "AI_ANALYZING",
+                            "detailStatus", aiStatus.getAnalysis_status(),
+                            "progress", aiStatus.getProgress_percentage(),
+                            "message", aiStatus.getStatus_message() != null ? aiStatus.getStatus_message() : "AI 분석 진행 중..."
+                    );
+                }
+            } catch (Exception e) {
+                log.error("AI 상태 조회 실패", e);
+            }
+        }
 
         // 그 외 상태 반환
         return Map.of(

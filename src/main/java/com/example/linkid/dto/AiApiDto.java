@@ -26,26 +26,30 @@ public class AiApiDto {
     @Builder
     @AllArgsConstructor
     public static class Utterance {
-        private String speaker;
-        private String text;
-        private Integer timestamp;
+        private String speaker;    // "A", "B" (화자 분리 결과)
+        private String text;       // 발화 내용
+        private Integer timestamp; // 시작 시간 (ms)
     }
 
     @Data
     @Builder
     public static class ChallengeSpec {
-        private String challenge_id;
+        @JsonProperty("challenge_id")
+        private String challengeId; // AI에 보낼 때는 String으로 변환
+
         private String title;
         private String goal;
-        private List<String> actions;
+        private List<String> actions; // 행동 내용들 (String 리스트)
     }
 
     @Data
     @Builder
     public static class MetaData {
         private String childName;
-        private String childGender;
-        private String childBirthDate;
+        private String childGender;    // "MALE", "FEMALE"
+        private String childBirthDate; // "YYYY-MM-DD"
+        private String contextTag;     // "자유놀이", "식사시간" 등
+        private Integer videoDuration; // 영상 길이 (초, 선택사항)
     }
 
     @Data
