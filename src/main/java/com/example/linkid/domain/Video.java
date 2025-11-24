@@ -25,6 +25,8 @@ public class Video extends BaseTimeEntity {
     @Column(nullable = false)
     private String originalVideoUrl;
 
+    private Integer duration;
+
     @Enumerated(EnumType.STRING)
     private VideoStatus status = VideoStatus.UPLOADING;
 

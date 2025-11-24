@@ -26,7 +26,6 @@ public class AnalysisReport extends BaseTimeEntity {
     private BigDecimal piScore;
     private BigDecimal ndiScore;
     private BigDecimal qiScore;
-    private BigDecimal piChange;
 
     @Column(columnDefinition = "TEXT") // JSON 형태로 저장
     private String content;

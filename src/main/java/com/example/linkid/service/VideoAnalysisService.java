@@ -15,10 +15,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +35,7 @@ public class VideoAnalysisService {
     private final ObjectMapper objectMapper;
 
     // 영상 업로드 Presigned URL 발급
-    public Map<String, Object> generatePresignedUrl(Long userId, String fileName, String contentType, String contextTag) {
+    public Map<String, Object> generatePresignedUrl(Long userId, String fileName, String contentType, String contextTag, Integer duration) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
@@ -57,6 +54,7 @@ public class VideoAnalysisService {
         video.setBucketKey(bucketKey);
         video.setContentType(contentType);
         video.setContextTag(contextTag);
+        video.setDuration(duration);
 
         // 원본 URL 저장 (다운로드용 URL 아님, 단순 참조용)
         String objectUrl = objectStorageService.getObjectUrl(bucketKey);
@@ -167,44 +165,31 @@ public class VideoAnalysisService {
 
             List<AiApiDto.Metric> diffMetrics = new ArrayList<>();
 
+            Map<String, Double> prevMap = new HashMap<>();
             if (prevReportOpt.isPresent()) {
-                // 직전 결과 파싱
                 AnalysisReport prevReport = prevReportOpt.get();
                 AiApiDto.AiResult prevResult = objectMapper.readValue(prevReport.getContent(), AiApiDto.AiResult.class);
-
                 if (prevResult.getStyle_analysis() != null && prevResult.getStyle_analysis().getParent_analysis() != null) {
-                    List<AiApiDto.Category> prevCategories = prevResult.getStyle_analysis().getParent_analysis().getCategories();
-
-                    // Map으로 변환하여 검색 속도 향상 (Label -> Ratio)
-                    Map<String, Double> prevMap = prevCategories.stream()
+                    prevMap = prevResult.getStyle_analysis().getParent_analysis().getCategories().stream()
                             .collect(Collectors.toMap(AiApiDto.Category::getLabel, AiApiDto.Category::getRatio));
-
-                    // 차이 계산
-                    for (AiApiDto.Category curr : currentCategories) {
-                        Double prevVal = prevMap.getOrDefault(curr.getLabel(), 0.0);
-                        Double currVal = curr.getRatio();
-                        double diff = currVal - prevVal; // 변화량 (예: 0.2 - 0.1 = 0.1)
-
-                        diffMetrics.add(AiApiDto.Metric.builder()
-                                .key(curr.getLabel()) // 키는 라벨로 사용
-                                .label(curr.getName())
-                                .value(currVal)
-                                .value_type("ratio")
-                                .diff(diff)
-                                .build());
-                    }
                 }
-            } else {
-                // 직전 리포트가 없는 경우 (첫 분석): 현재 값 기준 상위 3개 or 그대로 보여주기
-                for (AiApiDto.Category curr : currentCategories) {
-                    diffMetrics.add(AiApiDto.Metric.builder()
-                            .key(curr.getLabel())
-                            .label(curr.getName())
-                            .value(curr.getRatio())
-                            .value_type("ratio")
-                            .diff(0.0) // 변화 없음
-                            .build());
-                }
+            }
+
+            for (AiApiDto.Category curr : currentCategories) {
+                Double prevRatio = prevMap.getOrDefault(curr.getLabel(), 0.0);
+                Double currRatio = curr.getRatio();
+
+                double beforeVal = prevRatio * 100;
+                double afterVal = currRatio * 100;
+                double diffVal = afterVal - beforeVal;
+
+                diffMetrics.add(AiApiDto.Metric.builder()
+                        .label(curr.getName())      // "반영적 듣기"
+                        .before(Math.round(beforeVal * 10) / 10.0) // 소수점 1자리 반올림 (선택사항)
+                        .after(Math.round(afterVal * 10) / 10.0)
+                        .diff(Math.round(diffVal * 10) / 10.0)
+                        .value_type("ratio")        // 타입 지정
+                        .build());
             }
 
             // 변화량(절대값) 기준 내림차순 정렬 후 상위 3개 추출

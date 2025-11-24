@@ -15,4 +15,6 @@ public interface AnalysisReportRepository extends JpaRepository<AnalysisReport, 
     Optional<AnalysisReport> findFirstByChildIdOrderByCreatedAtDesc(Long childId);
 
     List<AnalysisReport> findTop5ByChildIdOrderByCreatedAtDesc(Long childId);
+
+    List<AnalysisReport> findAllByChildIdOrderByCreatedAtDesc(Long childId);
 }

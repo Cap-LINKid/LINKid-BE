@@ -21,7 +21,7 @@ public class VideoController {
 
     // 1. 영상 업로드용 Presigned URL 요청
     @PostMapping("/presign")
-    public ResponseEntity<?> getPresignedUrl(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> getPresignedUrl(@RequestBody Map<String, Object> request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
 
@@ -30,11 +30,14 @@ public class VideoController {
 
         Long userId = user.getUserId();
 
+        Integer duration = request.containsKey("duration") ? (Integer) request.get("duration") : 0;
+
         Map<String, Object> data = videoAnalysisService.generatePresignedUrl(
                 userId,
-                request.get("fileName"),
-                request.get("contentType"),
-                request.get("contextTag")
+                (String) request.get("fileName"),
+                (String) request.get("contentType"),
+                (String) request.get("contextTag"),
+                duration
         );
 
         return ResponseEntity.ok(Map.of(

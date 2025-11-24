@@ -108,7 +108,7 @@ public class AiApiDto {
     @NoArgsConstructor
     public static class GrowthReport {
         private JsonNode analysis_session;
-        private List<Metric> current_metrics; // [핵심] 우리가 수정할 리스트
+        private List<Metric> current_metrics;
         private JsonNode challenge_evaluation;
     }
 
@@ -117,11 +117,11 @@ public class AiApiDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Metric {
-        private String key;        // "reflective_listening_ratio"
         private String label;      // "반영적 듣기"
-        private Double value;      // 현재 값 (0.35)
-        private String value_type; // "ratio" or "count"
-        private Double diff;       // 직전 대비 변화량 (+0.15)
+        private Double before;     // [추가] 이전 값 (예: 15.0)
+        private Double after;      // [추가] 현재 값 (예: 35.0)
+        private Double diff;       // 변화량 (+20.0)
+        private String value_type; // "ratio" 고정
     }
 
     @Data
