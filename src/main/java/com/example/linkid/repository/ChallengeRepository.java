@@ -19,4 +19,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     Optional<Challenge> findFirstByChildChildIdAndStatusOrderByCreatedAtDesc(Long childId, ChallengeStatus status);
 
     List<Challenge> findAllByStatusAndEndDateBefore(ChallengeStatus status, LocalDate date);
+
+    int countByChildChildId(Long childId);
 }
