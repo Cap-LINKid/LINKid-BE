@@ -3,6 +3,7 @@ package com.example.linkid.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,8 @@ public class Challenge extends BaseTimeEntity {
 
     private LocalDate startDate;
     private LocalDate endDate;
+
+    private LocalDateTime completedAt;
 
     @Enumerated(EnumType.STRING)
     private ChallengeStatus status = ChallengeStatus.PROCEEDING;

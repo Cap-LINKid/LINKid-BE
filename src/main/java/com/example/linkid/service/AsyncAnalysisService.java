@@ -86,7 +86,11 @@ public class AsyncAnalysisService {
                             .goal(challenge.getGoal())
                             // 챌린지 하위의 행동(Action)들의 내용을 리스트로 추출
                             .actions(challenge.getActions().stream()
-                                    .map(ChallengeAction::getContent)
+                                    .filter(action -> !action.isCompleted())
+                                    .map(action -> AiApiDto.ActionSpec.builder()
+                                            .actionId(String.valueOf(action.getActionId()))
+                                            .content(action.getContent())
+                                            .build())
                                     .collect(Collectors.toList()))
                             .build())
                     .collect(Collectors.toList());

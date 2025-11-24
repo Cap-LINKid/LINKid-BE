@@ -39,7 +39,14 @@ public class AiApiDto {
 
         private String title;
         private String goal;
-        private List<String> actions; // 행동 내용들 (String 리스트)
+        private List<ActionSpec> actions;
+    }
+
+    @Data @Builder
+    public static class ActionSpec {
+        @JsonProperty("action_id")
+        private String actionId;
+        private String content;
     }
 
     @Data

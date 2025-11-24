@@ -44,4 +44,20 @@ public class ChallengeController {
         Long challengeId = challengeService.createChallengeFromReport(reportId, username);
         return ResponseEntity.ok(ApiResponse.success(challengeId, "챌린지가 생성(수락)되었습니다."));
     }
+
+    @PostMapping("/actions/{actionId}/complete")
+    public ResponseEntity<ApiResponse<ChallengeDto.CompleteActionResponse>> completeAction(
+            @PathVariable Long actionId,
+            @RequestBody ChallengeDto.CompleteActionRequest request) {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        ChallengeDto.CompleteActionResponse response = challengeService.completeAction(
+                actionId,
+                username,
+                request.getMemo()
+        );
+
+        return ResponseEntity.ok(ApiResponse.success(response, "챌린지 행동이 완료되었습니다."));
+    }
 }

@@ -3,16 +3,14 @@ package com.example.linkid.service;
 import com.example.linkid.domain.*;
 import com.example.linkid.dto.AiApiDto;
 import com.example.linkid.dto.ChallengeDto;
-import com.example.linkid.repository.AnalysisReportRepository;
-import com.example.linkid.repository.ChallengeRepository;
-import com.example.linkid.repository.ChildRepository;
-import com.example.linkid.repository.UserRepository;
+import com.example.linkid.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +23,7 @@ public class ChallengeService {
     private final AnalysisReportRepository reportRepository;
     private final UserRepository userRepository;
     private final ChildRepository childRepository;
+    private final ChallengeActionRepository challengeActionRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
@@ -154,5 +153,43 @@ public class ChallengeService {
 
     private Child getChild(User user) {
         return childRepository.findFirstByUser(user).orElseThrow(() -> new IllegalArgumentException("Child not found"));
+    }
+
+    @Transactional
+    public ChallengeDto.CompleteActionResponse completeAction(Long actionId, String username, String memo) {
+        User user = getUser(username);
+
+        ChallengeAction action = challengeActionRepository.findById(actionId)
+                .orElseThrow(() -> new IllegalArgumentException("행동을 찾을 수 없습니다."));
+
+        if (!action.getChallenge().getUser().getUserId().equals(user.getUserId())) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+
+        // 이미 완료된 경우 예외 처리 또는 무시 (여기선 업데이트로 처리)
+        action.setCompleted(true);
+        action.setCompletedAt(LocalDateTime.now());
+
+        if (memo != null && !memo.trim().isEmpty()) {
+            action.setReflection(memo);
+        }
+
+        checkAndCompleteChallenge(action.getChallenge());
+
+        return ChallengeDto.CompleteActionResponse.builder()
+                .actionId(action.getActionId())
+                .isCompleted(true)
+                .completedAt(action.getCompletedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .build();
+    }
+
+    private void checkAndCompleteChallenge(Challenge challenge) {
+        boolean allDone = challenge.getActions().stream()
+                .allMatch(ChallengeAction::isCompleted);
+
+        if (allDone) {
+            challenge.setStatus(ChallengeStatus.COMPLETED);
+             challenge.setCompletedAt(LocalDateTime.now());
+        }
     }
 }

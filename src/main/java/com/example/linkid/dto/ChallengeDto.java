@@ -57,4 +57,20 @@ public class ChallengeDto {
     public static class CreateRequest {
         private Long reportId;
     }
+
+    @Data
+    @NoArgsConstructor
+    public static class CompleteActionRequest {
+        private String memo; // 회고 (없으면 null)
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CompleteActionResponse {
+        private Long actionId;
+        private boolean isCompleted;
+        private String completedAt;
+    }
 }

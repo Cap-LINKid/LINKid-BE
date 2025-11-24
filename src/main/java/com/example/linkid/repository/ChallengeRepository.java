@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,4 +17,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     List<Challenge> findAllByChildIdAndStatus(@Param("childId") Long childId, @Param("status") ChallengeStatus status);
 
     Optional<Challenge> findFirstByChildChildIdAndStatusOrderByCreatedAtDesc(Long childId, ChallengeStatus status);
+
+    List<Challenge> findAllByStatusAndEndDateBefore(ChallengeStatus status, LocalDate date);
 }
