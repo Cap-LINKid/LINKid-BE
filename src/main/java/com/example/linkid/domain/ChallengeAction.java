@@ -3,6 +3,8 @@ package com.example.linkid.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
@@ -19,6 +21,8 @@ public class ChallengeAction {
     private String content; // 행동 내용 (예: "아이의 말 따라하기")
 
     private boolean isCompleted; // 행동별 완료 여부
+
+    private LocalDateTime completedAt;
 
     @Column(columnDefinition = "TEXT")
     private String reflection; // 회고 (선택 사항)

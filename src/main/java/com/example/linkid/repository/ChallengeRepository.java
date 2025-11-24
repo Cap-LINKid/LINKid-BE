@@ -12,8 +12,8 @@ import java.util.Optional;
 public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
 
     // 특정 자녀의 진행 중인 챌린지 목록 조회 (행동까지 같이 가져오기 위해 fetch join)
-    @Query("SELECT c FROM Challenge c JOIN FETCH c.actions WHERE c.child.childId = :childId AND c.status = 'PROCEEDING'")
-    List<Challenge> findActiveChallengesByChildId(@Param("childId") Long childId);
+    @Query("SELECT c FROM Challenge c JOIN FETCH c.actions WHERE c.child.childId = :childId AND c.status = :status")
+    List<Challenge> findAllByChildIdAndStatus(@Param("childId") Long childId, @Param("status") ChallengeStatus status);
 
     Optional<Challenge> findFirstByChildChildIdAndStatusOrderByCreatedAtDesc(Long childId, ChallengeStatus status);
 }

@@ -22,6 +22,10 @@ public class Challenge extends BaseTimeEntity {
     @JoinColumn(name = "child_id")
     private Child child;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "report_id")
+    private AnalysisReport sourceReport;
+
     private String title;
 
     @Column(columnDefinition = "TEXT")

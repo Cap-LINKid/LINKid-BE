@@ -74,7 +74,10 @@ public class AsyncAnalysisService {
                     .build();
 
             // (3) Active Challenges (진행 중인 챌린지 목록)
-            List<Challenge> activeChallenges = challengeRepository.findActiveChallengesByChildId(child.getChildId());
+            List<Challenge> activeChallenges = challengeRepository.findAllByChildIdAndStatus(
+                    child.getChildId(),
+                    ChallengeStatus.PROCEEDING
+            );
 
             List<AiApiDto.ChallengeSpec> challengeSpecs = activeChallenges.stream()
                     .map(challenge -> AiApiDto.ChallengeSpec.builder()
