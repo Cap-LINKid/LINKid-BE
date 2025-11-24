@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter @Setter
 @NoArgsConstructor
-public class Video {
+public class Video extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long videoId;
@@ -36,6 +36,5 @@ public class Video {
     @Column(columnDefinition = "TEXT")
     private String errorMessage;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime statusUpdatedAt = LocalDateTime.now();
 }

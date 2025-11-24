@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter @Setter
 @NoArgsConstructor
-public class AnalysisReport {
+public class AnalysisReport extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reportId;
@@ -30,6 +30,4 @@ public class AnalysisReport {
 
     @Column(columnDefinition = "TEXT") // JSON 형태로 저장
     private String content;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
 }
