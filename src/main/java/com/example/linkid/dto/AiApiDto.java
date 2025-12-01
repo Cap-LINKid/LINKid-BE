@@ -185,7 +185,6 @@ public class AiApiDto {
     public static class CoachingPlan {
         private String summary;
         private GeneratedChallenge challenge;
-        private String rationale;
 
         @JsonProperty("qa_tips")
         private JsonNode qaTips;
@@ -199,6 +198,7 @@ public class AiApiDto {
         private Integer period_days;
         private SuggestedPeriod suggested_period;
         private List<String> actions;
+        private String rationale;
     }
 
     @Data
