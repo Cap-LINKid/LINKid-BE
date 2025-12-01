@@ -1,0 +1,67 @@
+# ============================
+# Build / IDE / System Files
+# ============================
+
+# IDE
+.idea/
+.project
+.classpath
+.factorypath
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ============================
+# Build Outputs
+# ============================
+
+# Gradle
+.gradle/
+out/
+
+# Maven
+target/
+
+# Spring Boot local generated
+*.iml
+*.log
+
+# ============================
+# Dependency Caches
+# ============================
+
+# Gradle caches
+**/.gradle/
+
+# Maven caches
+.mvn/
+.mvnw
+.mvnw.cmd
+
+# ============================
+# Git / Environment
+# ============================
+
+.git/
+.gitignore
+
+# env files
+.env
+*.env
+
+# ============================
+# Test / Temp / Misc
+# ============================
+
+test-output/
+tmp/
+logs/
+*.tmp
+*.swp
+
+# Docker
+Dockerfile
+docker-compose.yml
