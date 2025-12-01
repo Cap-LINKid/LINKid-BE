@@ -92,9 +92,19 @@ public class AiApiDto {
     @Data
     @NoArgsConstructor
     public static class StyleAnalysis {
-        private AnalysisDetail parent_analysis;
-        private AnalysisDetail child_analysis;
+        @JsonProperty("interaction_style")
+        private InteractionStyle interactionStyle;
         private String summary;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class InteractionStyle {
+        @JsonProperty("parent_analysis")
+        private AnalysisDetail parentAnalysis;
+
+        @JsonProperty("child_analysis")
+        private AnalysisDetail childAnalysis;
     }
 
     @Data
@@ -116,7 +126,25 @@ public class AiApiDto {
     public static class GrowthReport {
         private JsonNode analysis_session;
         private List<Metric> current_metrics;
-        private JsonNode challenge_evaluation;
+
+        @JsonProperty("challenge_evaluations")
+        private List<ChallengeEvaluation> challengeEvaluations;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ChallengeEvaluation {
+        @JsonProperty("challenge_name")
+        private String challengeName;
+
+        @JsonProperty("action_id")
+        private Long actionId;
+
+        @JsonProperty("detected_count")
+        private Integer detectedCount;
+
+        private String description;
+        private JsonNode instances;
     }
 
     @Data
@@ -158,6 +186,9 @@ public class AiApiDto {
         private String summary;
         private GeneratedChallenge challenge;
         private String rationale;
+
+        @JsonProperty("qa_tips")
+        private JsonNode qaTips;
     }
 
     @Data

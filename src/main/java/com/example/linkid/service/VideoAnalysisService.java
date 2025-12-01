@@ -155,11 +155,12 @@ public class VideoAnalysisService {
     private void updateGrowthMetrics(Long childId, AiApiDto.AiResult currentResult) {
         try {
             if (currentResult.getStyle_analysis() == null ||
-                    currentResult.getStyle_analysis().getParent_analysis() == null) {
+                    currentResult.getStyle_analysis().getInteractionStyle() == null ||
+                    currentResult.getStyle_analysis().getInteractionStyle().getParentAnalysis() == null) {
                 return;
             }
-            List<AiApiDto.Category> currentCategories = currentResult.getStyle_analysis().getParent_analysis().getCategories();
-
+            List<AiApiDto.Category> currentCategories =
+                    currentResult.getStyle_analysis().getInteractionStyle().getParentAnalysis().getCategories();
             // 직전 리포트 가져오기
             Optional<AnalysisReport> prevReportOpt = reportRepository.findFirstByChildIdOrderByCreatedAtDesc(childId);
 
@@ -168,10 +169,18 @@ public class VideoAnalysisService {
             Map<String, Double> prevMap = new HashMap<>();
             if (prevReportOpt.isPresent()) {
                 AnalysisReport prevReport = prevReportOpt.get();
-                AiApiDto.AiResult prevResult = objectMapper.readValue(prevReport.getContent(), AiApiDto.AiResult.class);
-                if (prevResult.getStyle_analysis() != null && prevResult.getStyle_analysis().getParent_analysis() != null) {
-                    prevMap = prevResult.getStyle_analysis().getParent_analysis().getCategories().stream()
-                            .collect(Collectors.toMap(AiApiDto.Category::getLabel, AiApiDto.Category::getRatio));
+                try {
+                    AiApiDto.AiResult prevResult = objectMapper.readValue(prevReport.getContent(), AiApiDto.AiResult.class);
+                    if (prevResult.getStyle_analysis() != null &&
+                            prevResult.getStyle_analysis().getInteractionStyle() != null &&
+                            prevResult.getStyle_analysis().getInteractionStyle().getParentAnalysis() != null) {
+
+                        prevMap = prevResult.getStyle_analysis().getInteractionStyle().getParentAnalysis()
+                                .getCategories().stream()
+                                .collect(Collectors.toMap(AiApiDto.Category::getLabel, AiApiDto.Category::getRatio));
+                    }
+                } catch (Exception e) {
+                    log.warn("이전 리포트 파싱 실패 (구조 변경 가능성): {}", e.getMessage());
                 }
             }
 
@@ -202,11 +211,23 @@ public class VideoAnalysisService {
             if (currentResult.getGrowth_report() == null) {
                 currentResult.setGrowth_report(new AiApiDto.GrowthReport());
             }
-            currentResult.getGrowth_report().setCurrent_metrics(top3Metrics);
+            List<AiApiDto.Metric> existingMetrics = currentResult.getGrowth_report().getCurrent_metrics();
+            if (existingMetrics == null) {
+                currentResult.getGrowth_report().setCurrent_metrics(top3Metrics);
+            } else {
+                // 이미 AI가 준 메트릭이 있다면 거기에 변화량 메트릭을 합칠지, 덮어쓸지 결정해야 함.
+                // 보통 'ratio' 타입의 비교 메트릭을 우리가 계산해서 넣어주는 것이므로 덮어쓰거나 추가합니다.
+                // 여기서는 리스트를 합치는 방식을 사용하거나, AI가 count만 주고 ratio는 우리가 계산하는 방식이라면
+                // 위 로직대로 우리가 계산한 top3Metrics (ratio)를 넣어줍니다.
+                // AI 응답 예시에는 이미 current_metrics가 들어있으므로, addAll을 하거나
+                // AI가 보내준 ratio 필드에 값을 채워넣는 방식이 필요할 수 있습니다.
+                // 사용자 요청: "이전 분석에 나온 결과랑 이번 분석에 나오는거랑 수치 비교를 해서 비교변화가 가장 큰 세개를 growth_report 반환 안에 내가 포함해서 응답을 보내줘야해."
+                // 따라서 덮어쓰거나 리스트에 추가합니다. 여기서는 덮어쓰도록 하겠습니다.
+                currentResult.getGrowth_report().setCurrent_metrics(top3Metrics);
+            }
 
         } catch (Exception e) {
             log.error("성장 리포트 메트릭 계산 중 오류", e);
-            // 오류 나도 분석 전체를 실패처리하진 않고, 계산 안 된 상태로 넘어감
         }
     }
 
@@ -241,9 +262,6 @@ public class VideoAnalysisService {
         }
 
         reportRepository.save(report);
-
-        // 4. 챌린지 정보 저장
-        saveNewChallenge(video, result);
 
         // 5. 영상 상태 완료 처리
         video.setStatus(VideoStatus.COMPLETED);
