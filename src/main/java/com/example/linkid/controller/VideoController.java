@@ -29,7 +29,7 @@ public class VideoController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
 
-        User user = userRepository.findByName(currentUsername)
+        User user = userRepository.findByLoginId(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("로그인된 사용자 정보를 찾을 수 없습니다."));
 
         Long userId = user.getUserId();

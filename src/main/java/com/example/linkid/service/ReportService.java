@@ -77,7 +77,7 @@ public class ReportService {
     }
 
     private User getUser(String username) {
-        return userRepository.findByName(username)
+        return userRepository.findByLoginId(username)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
     }
 

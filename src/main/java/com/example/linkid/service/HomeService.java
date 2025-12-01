@@ -32,7 +32,7 @@ public class HomeService {
 
     @Transactional(readOnly = true)
     public HomeDto.HomeResponse getHomeData(String username) {
-        User user = userRepository.findByName(username)
+        User user = userRepository.findByLoginId(username)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
         Child child = childRepository.findFirstByUser(user)
                 .orElseThrow(() -> new IllegalArgumentException("자녀를 찾을 수 없습니다."));

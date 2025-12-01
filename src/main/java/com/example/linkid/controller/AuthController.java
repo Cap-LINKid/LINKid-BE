@@ -20,11 +20,11 @@ public class AuthController {
     // 아이디 중복 확인
     @Operation(summary = "아이디 중복 확인", description = "회원가입 시 아이디 중복 여부를 확인합니다.")
     @GetMapping("/check-name")
-    public ResponseEntity<ApiResponse<AuthDto.CheckNameResponse>> checkName(@RequestParam String name) {
-        boolean isAvailable = authService.checkNameAvailability(name);
+    public ResponseEntity<ApiResponse<AuthDto.CheckIdResponse>> checkName(@RequestParam String loginId) {
+        boolean isAvailable = authService.checkIdAvailability(loginId);
         String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.";
 
-        return ResponseEntity.ok(ApiResponse.success(new AuthDto.CheckNameResponse(isAvailable), message));
+        return ResponseEntity.ok(ApiResponse.success(new AuthDto.CheckIdResponse(isAvailable), message));
     }
 
     // 회원가입

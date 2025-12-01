@@ -26,19 +26,20 @@ public class AuthService {
 
     // 1. 아이디 중복 확인
     @Transactional(readOnly = true)
-    public boolean checkNameAvailability(String name) {
-        return !userRepository.existsByName(name);
+    public boolean checkIdAvailability(String loginId) {
+        return !userRepository.existsByLoginId(loginId);
     }
 
     // 2. 회원가입
     @Transactional
     public AuthDto.TokenResponse register(AuthDto.RegisterRequest request) {
-        if (userRepository.existsByName(request.getUser().getName())) {
+        if (userRepository.existsByLoginId(request.getUser().getLoginId())) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
 
         // 유저 저장
         User user = User.builder()
+                .loginId(request.getUser().getLoginId())
                 .name(request.getUser().getName())
                 .password(passwordEncoder.encode(request.getUser().getPassword()))
                 .build();
@@ -54,20 +55,20 @@ public class AuthService {
         childRepository.save(child);
 
         // 회원가입 후 자동 로그인 처리 (토큰 발급)
-        return generateToken(request.getUser().getName(), request.getUser().getPassword());
+        return generateToken(request.getUser().getLoginId(), request.getUser().getPassword());
     }
 
     // 3. 로그인
     @Transactional
     public AuthDto.TokenResponse login(AuthDto.LoginRequest request) {
-        return generateToken(request.getName(), request.getPassword());
+        return generateToken(request.getLoginId(), request.getPassword());
     }
 
     // 토큰 생성 내부 로직
-    private AuthDto.TokenResponse generateToken(String name, String password) {
+    private AuthDto.TokenResponse generateToken(String loginId, String password) {
         // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(name, password);
+                new UsernamePasswordAuthenticationToken(loginId, password);
 
         // 2. 실제 검증 (사용자 비밀번호 체크)
         // authenticate 매서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드가 실행됨

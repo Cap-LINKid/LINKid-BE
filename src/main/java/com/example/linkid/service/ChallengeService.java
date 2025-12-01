@@ -148,7 +148,7 @@ public class ChallengeService {
     }
 
     private User getUser(String username) {
-        return userRepository.findByName(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return userRepository.findByLoginId(username).orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     private Child getChild(User user) {

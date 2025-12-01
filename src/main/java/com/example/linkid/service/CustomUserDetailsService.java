@@ -18,8 +18,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByName(username)
+    public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
+        return userRepository.findByLoginId(loginId)
                 .map(this::createUserDetails)
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
     }
@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     // DB 의 User -> Security 의 UserDetails 로 변환
     private UserDetails createUserDetails(User user) {
         return new org.springframework.security.core.userdetails.User(
-                user.getName(),
+                user.getLoginId(),
                 user.getPassword(),
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"))
         );

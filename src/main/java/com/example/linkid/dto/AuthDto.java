@@ -9,9 +9,9 @@ public class AuthDto {
 
     // 1. 아이디 중복 확인 응답
     @Data
-    public static class CheckNameResponse {
+    public static class CheckIdResponse {
         private boolean isAvailable;
-        public CheckNameResponse(boolean isAvailable) { this.isAvailable = isAvailable; }
+        public CheckIdResponse(boolean isAvailable) { this.isAvailable = isAvailable; }
     }
 
     // 2. 회원가입 요청
@@ -23,8 +23,9 @@ public class AuthDto {
 
     @Data
     public static class UserRequest {
-        private String name;
+        private String loginId;
         private String password;
+        private String name;
     }
 
     @Data
@@ -37,7 +38,7 @@ public class AuthDto {
     // 3. 로그인 요청
     @Data
     public static class LoginRequest {
-        private String name;
+        private String loginId;
         private String password;
     }
 

@@ -22,7 +22,7 @@ public class MyPageService {
 
     @Transactional(readOnly = true)
     public MyPageDto.MyPageResponse getMyPageInfo(String username) {
-        User user = userRepository.findByName(username)
+        User user = userRepository.findByLoginId(username)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
         Child child = childRepository.findFirstByUser(user)
