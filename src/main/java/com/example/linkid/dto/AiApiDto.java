@@ -137,6 +137,12 @@ public class AiApiDto {
         @JsonProperty("challenge_name")
         private String challengeName;
 
+        private List<EvaluatedAction> actions;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class EvaluatedAction {
         @JsonProperty("action_id")
         private Long actionId;
 
@@ -144,7 +150,16 @@ public class AiApiDto {
         private Integer detectedCount;
 
         private String description;
-        private JsonNode instances;
+
+        // instances도 구체적으로 받을 수 있습니다. (JsonNode로 받아도 무방)
+        private List<EvaluationInstance> instances;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class EvaluationInstance {
+        private String timestamp;
+        private String summary;
     }
 
     @Data
@@ -156,6 +171,8 @@ public class AiApiDto {
         private Double before;     // [추가] 이전 값 (예: 15.0)
         private Double after;      // [추가] 현재 값 (예: 35.0)
         private Double diff;       // 변화량 (+20.0)
+        private String key;        // 예: "pattern_칭찬_count"
+        private Double value;      // 예: 1.0 (AI가 준 수치)
         private String value_type; // "ratio" 고정
     }
 
