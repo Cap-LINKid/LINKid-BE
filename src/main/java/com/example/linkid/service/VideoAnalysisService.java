@@ -117,12 +117,24 @@ public class VideoAnalysisService {
                     AnalysisReport report = reportRepository.findByVideo(video)
                             .orElseThrow(() -> new IllegalStateException("리포트가 생성되지 않았습니다."));
 
+                    Optional<Challenge> challengeOpt = challengeRepository.findBySourceReport_ReportId(report.getReportId());
+
+                    String challengeStatus = "NOT_CREATED"; // 기본값
+                    Long challengeId = null;
+
+                    if (challengeOpt.isPresent()) {
+                        challengeStatus = challengeOpt.get().getStatus().name();
+                        challengeId = challengeOpt.get().getChallengeId();
+                    }
+
                     return Map.of(
                             "videoId", video.getVideoId(),
                             "status", "COMPLETED",
                             "message", "분석이 완료되었습니다",
                             "reportId", report.getReportId(),
-                            "result", finalResult
+                            "result", finalResult,
+                            "challengeStatus", challengeStatus,
+                            "challengeId", challengeId != null ? challengeId : "null"
                     );
                 } else if ("failed".equalsIgnoreCase(aiStatus.getStatus())) {
                     video.setStatus(VideoStatus.FAILED);

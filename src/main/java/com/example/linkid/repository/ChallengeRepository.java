@@ -21,4 +21,6 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     List<Challenge> findAllByStatusAndEndDateBefore(ChallengeStatus status, LocalDate date);
 
     int countByChildChildId(Long childId);
+
+    Optional<Challenge> findBySourceReport_ReportId(Long reportId);
 }

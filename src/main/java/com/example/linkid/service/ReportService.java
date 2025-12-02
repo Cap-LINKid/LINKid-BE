@@ -1,11 +1,13 @@
 package com.example.linkid.service;
 
 import com.example.linkid.domain.AnalysisReport;
+import com.example.linkid.domain.Challenge;
 import com.example.linkid.domain.Child;
 import com.example.linkid.domain.User;
 import com.example.linkid.dto.AiApiDto;
 import com.example.linkid.dto.ReportDto;
 import com.example.linkid.repository.AnalysisReportRepository;
+import com.example.linkid.repository.ChallengeRepository;
 import com.example.linkid.repository.ChildRepository;
 import com.example.linkid.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +28,7 @@ public class ReportService {
     private final UserRepository userRepository;
     private final ChildRepository childRepository;
     private final AnalysisReportRepository reportRepository;
+    private final ChallengeRepository challengeRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
@@ -68,11 +72,24 @@ public class ReportService {
             log.error("리포트 상세 조회 중 JSON 파싱 오류: reportId={}", reportId, e);
         }
 
+        Optional<Challenge> challengeOpt = challengeRepository.findBySourceReport_ReportId(reportId);
+
+        String status = "NOT_CREATED";
+        Long challengeId = null;
+
+        if (challengeOpt.isPresent()) {
+            Challenge challenge = challengeOpt.get();
+            status = challenge.getStatus().name(); // "PROCEEDING", "COMPLETED", "FAILED"
+            challengeId = challenge.getChallengeId();
+        }
+
         return ReportDto.ReportDetailResponse.builder()
                 .reportId(report.getReportId())
                 .createdAt(report.getCreatedAt())
                 .username(user.getName())
                 .content(aiContent)
+                .challengeStatus(status)
+                .challengeId(challengeId)
                 .build();
     }
 

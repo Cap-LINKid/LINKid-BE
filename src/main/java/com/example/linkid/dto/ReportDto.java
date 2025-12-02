@@ -40,5 +40,8 @@ public class ReportDto {
 
         private String username;
         private AiApiDto.AiResult content;
+
+        private String challengeStatus; // "NOT_CREATED", "PROCEEDING", "COMPLETED"
+        private Long challengeId;
     }
 }
