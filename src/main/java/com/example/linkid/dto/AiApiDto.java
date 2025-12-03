@@ -52,11 +52,17 @@ public class AiApiDto {
     @Data
     @Builder
     public static class MetaData {
+        @JsonProperty("child_name")
         private String childName;
-        private String childGender;    // "MALE", "FEMALE"
-        private String childBirthDate; // "YYYY-MM-DD"
+
+        @JsonProperty("child_age")
+        private Integer childAge;
+
+        @JsonProperty("situation")
         private String contextTag;     // "자유놀이", "식사시간" 등
-        private Integer videoDuration; // 영상 길이 (초, 선택사항)
+
+        @JsonProperty("child_gender")
+        private String childGender;
     }
 
     @Data

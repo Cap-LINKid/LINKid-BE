@@ -12,7 +12,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,10 +68,12 @@ public class AsyncAnalysisService {
             Child child = childRepository.findById(video.getChildId())
                     .orElseThrow(() -> new IllegalArgumentException("자녀 정보를 찾을 수 없습니다."));
 
+            int age = Period.between(child.getBirthdate(), LocalDate.now()).getYears();
+
             AiApiDto.MetaData metaData = AiApiDto.MetaData.builder()
                     .childName(child.getName())
+                    .childAge(age)
                     .childGender(child.getGender().name())
-                    .childBirthDate(child.getBirthdate().toString()) // LocalDate -> String
                     .contextTag(video.getContextTag()) // 영상 업로드 시 받은 태그
                     .build();
 
