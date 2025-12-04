@@ -54,7 +54,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "http://localhost:5173",
-            "https://52.78.180.6.nip.io/", "https://54.116.22.29.nip.io", "https://lin-kid.vercel.app/")
+            "https://52.78.180.6.nip.io/", "https://54.116.22.29.nip.io", "https://linkid-delta.vercel.app/")
         );
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
