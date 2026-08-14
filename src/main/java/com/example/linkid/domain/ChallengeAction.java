@@ -17,7 +17,7 @@ public class ChallengeAction {
     @JoinColumn(name = "challenge_id")
     private Challenge challenge;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content; // 행동 내용 (예: "아이의 말 따라하기")
 
     private boolean isCompleted; // 행동별 완료 여부

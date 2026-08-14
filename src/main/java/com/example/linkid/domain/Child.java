@@ -33,7 +33,7 @@ public class Child extends BaseTimeEntity {
     @Column(length = 10)
     private Gender gender = Gender.OTHER;
 
-    @Column(columnDefinition = "json")
+    @Column(columnDefinition = "text")
     private String parentingStyle;
 
     public enum Gender {
